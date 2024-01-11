@@ -3,7 +3,13 @@
 
 
 def to_str(n: float) -> str:
-    """ A ype-annotated function `to_str` that takes a float `n` as
-        argument and returns the string representation of the float.
+    """
+    A function that returns the string representation of the float.
+
+    parameters:
+    - n (float): A float to be represented by a string.
+
+    Returns:
+    - The string representation of the float.
     """
     return str(n)

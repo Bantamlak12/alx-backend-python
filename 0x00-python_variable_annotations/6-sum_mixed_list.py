@@ -7,8 +7,14 @@ Num = Union[int, float]
 
 
 def sum_mixed_list(mxd_lst: List[Num]) -> float:
-    """ A type-annotated function `sum_mixed_list` which takes a list `mxd_lst`
-        of integers and floats and returns their sum as a float.
+    """
+    A function that returns a sum as a float.
+
+    parameters:
+    - mxd_lst (List[Num]): List of integers and flaots.
+
+    Returns:
+    - Their sum as a float.
     """
     sum = 0
     for num in mxd_lst:

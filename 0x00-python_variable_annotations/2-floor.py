@@ -3,7 +3,13 @@
 
 
 def floor(n: float) -> int:
-    """ A type-annotated function `floor` which takes a float `n`
-        as argument and returns the floor of the floot.
+    """
+    A function that returns the floor of the float.
+
+    parameters:
+    - n (float): A float number to find the floor.
+
+    Returns:
+    - Floor of the float.
     """
     return int(n // 1)
