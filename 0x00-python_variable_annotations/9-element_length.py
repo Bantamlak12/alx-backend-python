@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""A module that type an iterable"""
 from typing import Iterable, List, Tuple, Sequence
 
 
