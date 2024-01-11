@@ -2,10 +2,8 @@
 """A module that returns the fist element of a sequence"""
 from typing import Sequence, Any, Union
 
-NoneType = type(None)
 
-
-def safe_first_element(lst: Sequence[Any]) -> Union[Any, NoneType]:
+def safe_first_element(lst: Sequence[Any]) -> Union[Any, None]:
     """
     A function that returns the first element of a sequence.
 
