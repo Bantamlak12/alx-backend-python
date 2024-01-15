@@ -7,7 +7,7 @@ import random
 from typing import Union
 
 
-async def wait_random(max_delay: Union[int, float] = 10) -> float:
+async def wait_random(max_delay: int = 10) -> float:
     """
     Parameters:
     - max_delay=10 (number) - maximum seconds to delay
