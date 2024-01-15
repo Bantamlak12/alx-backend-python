@@ -4,9 +4,10 @@ File: 0-basic_async_syntax.py
 """
 import asyncio
 import random
+from typing import Union
 
 
-async def wait_random(max_delay=10):
+async def wait_random(max_delay: Union[int, float] = 10) -> float:
     """
     Parameters:
     - max_delay=10 (number) - maximum seconds to delay
@@ -14,4 +15,6 @@ async def wait_random(max_delay=10):
     Returns:
     - waits for a random delay and returns it.
     """
-    return random.uniform(0, max_delay)
+    delay = random.uniform(0, max_delay)
+    await asyncio.sleep(delay)
+    return delay
