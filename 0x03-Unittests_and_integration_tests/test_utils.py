@@ -2,10 +2,10 @@
 """
 File: test_utils.py
 """
-from parameterized import parameterized
+from utils import access_nested_map, get_json
+from parameterized import parameterized, parameterized_class
+from unittest.mock import patch, Mock
 import unittest
-
-access_nested_map = __import__('utils').access_nested_map
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -28,3 +28,27 @@ class TestAccessNestedMap(unittest.TestCase):
         if result == KeyError:
             with self.assertRaises(KeyError):
                 access_nested_map(nested, path)
+
+
+@parameterized_class([
+    {"url": "http://example.com", "payload": {"payload": True}},
+    {"url": "http://holberton.io", "payload": {"payload": False}}
+])
+class TestGetJson(unittest.TestCase):
+    """ Mock HTTP Calls """
+
+    @patch('requests.get')
+    def test_get_json(self, mock_get):
+        """Test the get_json function with different URL and payloads."""
+        mock_response = Mock()
+        mock_response.json.return_value = self.payload
+        mock_get.return_value = mock_response
+
+        result = get_json(self.url)
+
+        mock_get.assert_called_once_with(self.url)
+        self.assertEqual(result, self.payload)
+
+
+if __name__ == '__main__':
+    unittest.main()
