@@ -37,18 +37,14 @@ class TestAccessNestedMap(unittest.TestCase):
 class TestGetJson(unittest.TestCase):
     """ Mock HTTP Calls """
 
-    @patch('requests.get')
-    def test_get_json(self, mock_get):
+    def test_get_json(self):
         """Test the get_json function with different URL and payloads."""
-        mock_response = Mock()
-        mock_response.json.return_value = self.payload
-        mock_get.return_value = mock_response
+        with patch('requests.get') as mock_get:
+            mock_response = Mock()
+            mock_response.json.return_value = self.payload
+            mock_get.return_value = mock_response
 
-        result = get_json(self.url)
+            result = get_json(self.url)
 
         mock_get.assert_called_once_with(self.url)
         self.assertEqual(result, self.payload)
-
-
-if __name__ == '__main__':
-    unittest.main()
