@@ -3,7 +3,7 @@
 File: test_utils.py
 """
 from utils import access_nested_map, get_json
-from parameterized import parameterized, parameterized_class
+from parameterized import parameterized
 from unittest.mock import patch, Mock
 import unittest
 
@@ -30,21 +30,21 @@ class TestAccessNestedMap(unittest.TestCase):
                 access_nested_map(nested, path)
 
 
-@parameterized_class([
-    {"url": "http://example.com", "payload": {"payload": True}},
-    {"url": "http://holberton.io", "payload": {"payload": False}}
-])
 class TestGetJson(unittest.TestCase):
     """ Mock HTTP Calls """
 
-    def test_get_json(self):
+    @parameterized.expand([
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False})
+    ])
+    def test_get_json(self, url, payload):
         """Test the get_json function with different URL and payloads."""
         with patch('requests.get') as mock_get:
             mock_response = Mock()
-            mock_response.json.return_value = self.payload
+            mock_response.json.return_value = payload
             mock_get.return_value = mock_response
 
-            result = get_json(self.url)
+            result = get_json(url)
 
-        mock_get.assert_called_once_with(self.url)
-        self.assertEqual(result, self.payload)
+        mock_get.assert_called_once_with(url)
+        self.assertEqual(result, payload)
