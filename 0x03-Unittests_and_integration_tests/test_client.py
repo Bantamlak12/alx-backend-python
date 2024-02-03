@@ -2,9 +2,10 @@
 """
 File: test_client
 """
-from client import GithubOrgClient
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from unittest.mock import patch, PropertyMock, Mock
+from client import GithubOrgClient
+from fixtures import TEST_PAYLOAD
 import unittest
 
 
@@ -57,3 +58,26 @@ class TestGithubOrgClient(unittest.TestCase):
     def test_has_license(self, repo, l_key, expected):
         """ Tests has_license_key method """
         self.assertEqual(GithubOrgClient.has_license(repo, l_key), expected)
+
+
+@parameterized_class(
+    ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
+    TEST_PAYLOAD
+    )
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """ Integration test: fixtures """
+
+    @classmethod
+    def setUpClass(cls):
+        """ Set up class for integration test """
+        cls.get_patcher = patch('requests.get')
+        with cls.get_patcher('requests.get') as mock_get:
+            mock_response = Mock()
+            mock_get.json.side_effect = [cls.org_payload, cls.repos_payload]
+            mock_get.return_value = mock_response
+            cls.client = GithubOrgClient('google')
+
+    @classmethod
+    def tearDownClass(cls):
+        """ Tear down class after intergration test """
+        cls.get_patcher.stop()
