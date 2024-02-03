@@ -2,10 +2,9 @@
 """
 File: test_client
 """
-from client import GithubOrgClient, get_json
+from client import GithubOrgClient
 from parameterized import parameterized
-from unittest.mock import patch
-import client
+from unittest.mock import patch, PropertyMock
 import unittest
 
 
@@ -25,3 +24,13 @@ class TestGithubOrgClient(unittest.TestCase):
         url = f'https://api.github.com/orgs/{org}'
         get_response.assert_called_once_with(url)
         self.assertEqual(result, {'result': 'Success'})
+
+    @patch('client.GithubOrgClient._public_repos_url',
+           new_callable=PropertyMock)
+    def test_public_repos_url(self, mock_property):
+        """ Mocking a property """
+        mock_property.return_value = "https://api.github.com/orgs/google/repos"
+        obj = GithubOrgClient('google')
+        result = obj._public_repos_url
+        self.assertEqual(result, "https://api.github.com/orgs/google/repos")
+        mock_property.assert_called_once()
