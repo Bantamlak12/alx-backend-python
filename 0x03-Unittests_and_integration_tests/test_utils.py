@@ -2,14 +2,15 @@
 """
 File: test_utils.py
 """
-from utils import access_nested_map, get_json
+from utils import access_nested_map, get_json, memoize
 from parameterized import parameterized
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, PropertyMock
 import unittest
 
 
 class TestAccessNestedMap(unittest.TestCase):
     """ Provides a unit test """
+
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
@@ -48,3 +49,34 @@ class TestGetJson(unittest.TestCase):
 
         mock_get.assert_called_once_with(url)
         self.assertEqual(result, payload)
+
+
+class TestMemoize(unittest.TestCase):
+    """ Unit test for memoize decorator """
+
+    def test_memoize(self):
+        """ Test memoization """
+
+        class TestClass:
+
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+
+        with patch.object(TestClass, 'a_method') as mock_a_method:
+            test_instance = TestClass()
+            mock_a_method.return_value = 42
+
+            # Call the method twice
+            result1 = test_instance.a_property
+            result2 = test_instance.a_property
+
+            # Assert a_method was called only once
+            mock_a_method.assert_called_once()
+
+            # Assert if the results are equal
+            self.assertEqual(result1, 42)
+            self.assertEqual(result2, 42)
