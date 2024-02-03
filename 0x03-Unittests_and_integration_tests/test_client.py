@@ -4,7 +4,7 @@ File: test_client
 """
 from client import GithubOrgClient
 from parameterized import parameterized
-from unittest.mock import patch, PropertyMock
+from unittest.mock import patch, PropertyMock, Mock
 import unittest
 
 
@@ -34,3 +34,18 @@ class TestGithubOrgClient(unittest.TestCase):
         result = obj._public_repos_url
         self.assertEqual(result, "https://api.github.com/orgs/google/repos")
         mock_property.assert_called_once()
+
+    @patch('client.get_json')
+    def test_public_repos(self, mock_get_json):
+        """ Tests GithubOrgClient.public_repos """
+
+        mock_get_json.return_value = [{"name": "Repo1"}, {"name": "Repo2"}]
+
+        mock = 'client.GithubOrgClient._public_repos_url'
+        with patch(mock, new_callable=PropertyMock,
+                   return_value="https://example.com") as mock_url:
+            c = GithubOrgClient('google')
+            result = c.public_repos()
+            self.assertEqual(result, ["Repo1", "Repo2"])
+            mock_url.assert_called_once()
+            mock_get_json.assert_called_once_with("https://example.com")
