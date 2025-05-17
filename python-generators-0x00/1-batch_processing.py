@@ -11,6 +11,7 @@ def create_connection():
     )
 
 def stream_users_in_batches(batch_size):
+    """Generator that yields users in batch"""
     connection = create_connection()
     cursor = connection.cursor()
 
@@ -26,6 +27,7 @@ def stream_users_in_batches(batch_size):
     connection.close()
 
 def batch_processing(batch_size):
+    """Processing each batch to print users who are over age 25"""
     for batch in stream_users_in_batches(batch_size):
         filtered_batch = [user for user in batch if user[3] > 25]
         if filtered_batch:
