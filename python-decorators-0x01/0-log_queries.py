@@ -5,6 +5,8 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
+#### decorator to lof SQL queries
+
 def log_queries(func):
     """Decorator to log SQL queries"""
     @functools.wraps(func)
@@ -23,6 +25,5 @@ def fetch_all_users(query):
     conn.close()
     return results
 
-# Fetch users while logging the query
+#### fetch users while logging the query
 users = fetch_all_users(query="SELECT * FROM users")
-
