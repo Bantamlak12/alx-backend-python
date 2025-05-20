@@ -21,19 +21,15 @@ def with_db_connection(func):
 def cache_query(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # Check if this query is inside of query_cache dict
-        current_query = kwargs["query"]
-        if len(query_cache) > 0:
-            for cached_query in query_cache.values():
-                # If query is cached, use the cached one
-                if cached_query == current_query:
-                    kwargs["query"] = cached_query
-                    return func(*args, **kwargs)
-                else:
-                    # If the cache doesn't exist, create the cache
-                    key = datetime.now()
-                    query_cache[key] = current_query
-        query_cache[datetime.now()] = current_query
+        query = kwargs.get("query")
+        if query in query_cache:
+            print(f"Using cached query result, and it is {query_cache[query]}")
+            return query_cache[query]
+        print("Query result was not cached")
+        # Run the query and cache the result
+        result = func(*args, **kwargs)
+        query_cache[query] = result
+        return result
     return wrapper
 
 @with_db_connection
