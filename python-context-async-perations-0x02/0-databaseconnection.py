@@ -1,5 +1,14 @@
 import mysql.connector
-from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# Database credentials
+database = os.environ.get("DATABASE_NAME")
+user = os.environ.get("USER")
+password = os.environ.get("PASSWORD")
+host = os.environ.get("HOST")
 
 class DatabaseConnection():
     """Custom class based context manager for database connection"""
@@ -22,7 +31,8 @@ class DatabaseConnection():
             self.connection = connection
             self.cursor = connection.cursor()
         except Exception as err:
-            print("Database connection failed. Double check database name or credentials you passed.")
+            print(f"Database connection failed. {err}")
+            raise
         finally:
             return self.cursor
 
@@ -34,9 +44,10 @@ class DatabaseConnection():
         if exc_type:
             return False
 
-
-with DatabaseConnection("ALX_prodev", "bantamlak", "dispensed") as cursor:
-    cursor.execute("SELECT * FROM users")
-    results = cursor.fetchall()
-    print(results)
-
+try:
+    with DatabaseConnection(database, user, password, host) as cursor:
+        cursor.execute("SELECT * FROM users")
+        results = cursor.fetchall()
+        print(results)
+except Exception as e:
+    print(e)
