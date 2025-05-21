@@ -1,6 +1,6 @@
+import os
 import mysql.connector
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
@@ -10,7 +10,7 @@ user = os.environ.get("USER")
 password = os.environ.get("PASSWORD")
 host = os.environ.get("HOST")
 
-class DatabaseConnection():
+class DatabaseConnection:
     """Custom class based context manager for database connection"""
     def __init__(self, database, user, password, host="localhost"):
         self.database = database
@@ -44,10 +44,15 @@ class DatabaseConnection():
         if exc_type:
             return False
 
-try:
-    with DatabaseConnection(database, user, password, host) as cursor:
-        cursor.execute("SELECT * FROM users")
-        results = cursor.fetchall()
-        print(results)
-except Exception as e:
-    print(e)
+def main():
+    try:
+        with DatabaseConnection(database, user, password, host) as cursor:
+            cursor.execute("SELECT * FROM users")
+            results = cursor.fetchall()
+            print(results)
+    except Exception as e:
+        print(e)
+
+if __name__ == "__main__":
+    main()
+
