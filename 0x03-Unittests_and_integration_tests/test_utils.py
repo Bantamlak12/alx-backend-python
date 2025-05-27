@@ -17,7 +17,7 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a", "b"), 2)
     ])
     def test_access_nested_map(self, nested_map, path, expected_result):
-        """ Testing for value Equality """
+        """ Testing for value Equality. Parametrized unit test """
         self.assertEqual(access_nested_map(nested_map, path), expected_result)
 
     @parameterized.expand([
