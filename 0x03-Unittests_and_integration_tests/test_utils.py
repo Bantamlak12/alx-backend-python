@@ -37,17 +37,17 @@ class TestGetJson(unittest.TestCase):
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False})
     ])
-    def test_get_json(self, url, payload):
+    @patch("utils.requests.get")
+    def test_get_json(self, url, payload, mock_get):
         """Test the get_json function with different URL and payloads."""
-        with patch('requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.json.return_value = payload
-            mock_get.return_value = mock_response
+        mock_response = Mock()
+        mock_response.json.return_value = payload
+        mock_get.return_value = mock_response
 
-            result = get_json(url)
+        result = get_json(url)
 
-        mock_get.assert_called_once_with(url)
         self.assertEqual(result, payload)
+        mock_get.assert_called_once_with(url)
 
 
 class TestMemoize(unittest.TestCase):
