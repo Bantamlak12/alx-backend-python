@@ -21,14 +21,13 @@ class TestAccessNestedMap(unittest.TestCase):
         self.assertEqual(access_nested_map(nested_map, path), expected_result)
 
     @parameterized.expand([
-        ({}, ("a",), KeyError),
-        ({"a": 1}, ("a", "b"), KeyError)
+        ({}, ("a",)),
+        ({"a": 1}, ("a", "b"))
     ])
-    def test_access_nested_map_exception(self, nested, path, result):
-        """ Testing for a key Error """
-        if result == KeyError:
-            with self.assertRaises(KeyError):
-                access_nested_map(nested, path)
+    def test_access_nested_map_exception(self, nested, path):
+        """ Testing for a KeyError with context manager"""
+        with self.assertRaises(KeyError):
+            access_nested_map(nested, path)
 
 
 class TestGetJson(unittest.TestCase):
