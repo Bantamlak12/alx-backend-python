@@ -13,18 +13,20 @@ class TestGithubOrgClient(unittest.TestCase):
     """ Unit tests """
 
     @parameterized.expand([
-        ('google'),
-        ('abc')
+        ('google', {'message': 'success'}),
+        ('abc', {'message': 'success'})
     ])
-    @patch('client.get_json')
     def test_org(self, org, get_response):
         """ Tests the org method """
-        get_response.return_value = {'result': 'Success'}
-        client = GithubOrgClient(org)
-        result = client.org
-        url = f'https://api.github.com/orgs/{org}'
-        get_response.assert_called_once_with(url)
-        self.assertEqual(result, {'result': 'Success'})
+        with patch('client.get_json') as mock_get_json:
+            mock_get_json.return_value = get_response
+
+            client = GithubOrgClient(org)
+            result = client.org
+
+            self.assertEqual(result, get_response)
+
+            mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org}")
 
     @patch('client.GithubOrgClient._public_repos_url',
            new_callable=PropertyMock)
