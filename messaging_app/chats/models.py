@@ -8,6 +8,9 @@ from django.db import models
 class CustomUser(AbstractUser):
     """A user model which is an extension of the Abstract user."""
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(max_length=80, blank=True, unique=True)
+    first_name = models.CharField(max_length=50, blank=True)
+    last_name =  models.CharField(max_length=50, blank=True)
     phone_number = models.CharField(max_length=15, blank=True,null=True)
 
 
