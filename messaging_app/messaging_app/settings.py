@@ -42,6 +42,15 @@ INSTALLED_APPS = [
     'chats',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASS': [
+        'rest_framework.permissions.IsAuthenticated'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASS': [
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
