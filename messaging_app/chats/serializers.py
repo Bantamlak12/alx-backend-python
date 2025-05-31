@@ -1,7 +1,6 @@
 """ serializers.py
 """
 from rest_framework import serializers
-from rest_framework.exceptions  import ValidationError
 from .models import CustomUser, Conversation, Message
 
 
@@ -18,18 +17,18 @@ class CustomUserSerializer(serializers.Serializer):
 
     def validate_email(self, email):
         if CustomUser.objects.filter(email=email).exists():
-            raise ValidationError('A user with this email exists.')
+            raise serializers.ValidationError('A user with this email exists.')
         return email
 
     def create(self, validated_data):
         return CustomUser.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-       instance.first_name  = validated_data.get('first_name', instance.first_name)
-       instance.last_name = validated_data.get('last_name', instance.last_name)
-       instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-       instance.save()
-       return instance
+        instance.first_name  = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.save()
+        return instance
 
 class MessageSerializer(serializers.Serializer):
     message_id = serializers.CharField(read_only=True)
@@ -39,13 +38,9 @@ class MessageSerializer(serializers.Serializer):
     sent_at = serializers.DateTimeField(read_only=True)
 
     def validate_message_body(self, message):
-        if not message.strip()
-            raise ValidationError('Message body cannot be empty.')
+        if not message.strip():
+            raise serializers.ValidationError('Message body cannot be empty.')
         return message
-    
-    def create(self, validated_data):
-        sender = self.context['request'].user
-        return Message.objects.create(sender=sender, **validated_data)
 
 
 class ConversationSerializer(serializers.Serializer):
