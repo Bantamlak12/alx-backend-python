@@ -1,27 +1,62 @@
 """ serializers.py
 """
 from rest_framework import serializers
+from rest_framework.exceptions  import ValidationError
 from .models import CustomUser, Conversation, Message
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['user_id', 'email', 'first_name', 'last_name', 'phone_number']
+class CustomUserSerializer(serializers.Serializer):
+    user_id = serializers.CharField(read_only=True)
+    email = serializers.EmailField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+    phone_number = serializers.CharField(required=True)
+    full_name = serializers.SerializerMethodField()
 
+    def get_full_name(self, obj):
+        return "{} {}".format(obj.first_name, obj.last_name)
 
-class MessageSerializer(serializers.ModelSerializer):
+    def validate_email(self, email):
+        if CustomUser.objects.filter(email=email).exists():
+            raise ValidationError('A user with this email exists.')
+        return email
+
+    def create(self, validated_data):
+        return CustomUser.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+       instance.first_name  = validated_data.get('first_name', instance.first_name)
+       instance.last_name = validated_data.get('last_name', instance.last_name)
+       instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+       instance.save()
+       return instance
+
+class MessageSerializer(serializers.Serializer):
+    message_id = serializers.CharField(read_only=True)
     sender = CustomUserSerializer(read_only=True)
+    conversation = serializers.CharField()
+    message_body =serializers.CharField()
+    sent_at = serializers.DateTimeField(read_only=True)
 
-    class Meta:
-        model = Message
-        fields = ['message_id', 'sender', 'conversation', 'message_body', 'sent_at']
+    def validate_message_body(self, message):
+        if not message.strip()
+            raise ValidationError('Message body cannot be empty.')
+        return message
+    
+    def create(self, validated_data):
+        sender = self.context['request'].user
+        return Message.objects.create(sender=sender, **validated_data)
 
 
-class ConversationSerializer(serializers.ModelSerializer):
+class ConversationSerializer(serializers.Serializer):
+    conversation_id = serializers.CharField(read_only=True)
     participants = CustomUserSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    latest_message = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Conversation
-        fields = ['conversation_id', 'participants', 'created_at', 'messages']
+    def get_latest_message(self, obj):
+        latest = obj.message.order_by('-sent_at').first()
+        if latest:
+            return latest.message_body
+        return None
