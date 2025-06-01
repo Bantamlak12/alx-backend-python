@@ -31,9 +31,9 @@ class CustomUserSerializer(serializers.Serializer):
         return instance
 
 class MessageSerializer(serializers.Serializer):
-    message_id = serializers.CharField(read_only=True)
-    sender = CustomUserSerializer(read_only=True)
-    conversation = serializers.CharField()
+    message_id = serializers.UUIDField(read_only=True)
+    sender = serializers.UUIDField()
+    conversation = serializers.UUIDField()
     message_body =serializers.CharField()
     sent_at = serializers.DateTimeField(read_only=True)
 
@@ -42,16 +42,35 @@ class MessageSerializer(serializers.Serializer):
             raise serializers.ValidationError('Message body cannot be empty.')
         return message
 
+    def create(self, validated_data):
+        sender = CustomUser.objects.get(user_id=validated_data['sender'])
+        conversation = Conversation.objects.get(conversation_id=validated_data['conversation'])
+
+        message = Message.objects.create(
+            sender=sender,
+            conversation=conversation,
+            message_body=validated_data['message_body']
+        )
+        return message
+
 
 class ConversationSerializer(serializers.Serializer):
-    conversation_id = serializers.CharField(read_only=True)
-    participants = CustomUserSerializer(many=True, read_only=True)
+    conversation_id = serializers.UUIDField(read_only=True)
+    participants = serializers.ListField(
+        child=serializers.UUIDField(),
+        write_only=True
+    )
     messages = MessageSerializer(many=True, read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     latest_message = serializers.SerializerMethodField()
 
     def get_latest_message(self, obj):
         latest = obj.message.order_by('-sent_at').first()
-        if latest:
-            return latest.message_body
-        return None
+        return latest.message_body if latest else None
+
+    def create(self, validated_data):
+        participant_ids = validated_data.pop('participants', [])
+        conversation = Conversation.objects.create()
+        users = CustomUser.objects.filter(user_id__in=participant_ids)
+        conversation.participants.ser(users)
+        return conversation
