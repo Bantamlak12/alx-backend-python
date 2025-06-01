@@ -1,18 +1,18 @@
 from rest_framework import viewsets, status
+from rest_framework.request import Request
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from rest_framework import filters
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 
 
 class ConversationViewSet(viewsets.ViewSet):
+    search_filter =filters.SearchFilter()
 
-    def list(self, request):
-        user_id = request.query_params.get('user_id')
+    def list(self, request: Request):
         queryset = Conversation.objects.all()
 
-        if user_id:
-            queryset = queryset.filter(participants_user_id=user_id)
+        queryset = self.search_filter.filter_queryset(request, queryset, self)
 
         serializer = ConversationSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -26,13 +26,12 @@ class ConversationViewSet(viewsets.ViewSet):
 
 
 class MessageViewSet(viewsets.ViewSet):
+    ordering_filter = filters.OrderingFilter()
 
     def list(self, request):
-        conversation_id = request.query_params.get('conversation_id')
         queryset = Message.objects.all()
 
-        if conversation_id:
-            queryset = queryset.filter(conversation__conversation_id=conversation_id)
+        queryset = self.ordering_filter.filter_queryset(request, queryset, self)
 
         serializer = MessageSerializer(queryset, many=True)
         return Response(serializer.data)
