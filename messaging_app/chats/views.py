@@ -8,15 +8,15 @@ from .serializers import ConversationSerializer, MessageSerializer
 class ConversationViewSet(viewsets.ViewSet):
 
     def list(self, request):
+        user_id = request.query_params.get('user_id')
         queryset = Conversation.objects.all()
+
+        if user_id:
+            queryset = queryset.filter(participants_user_id=user_id)
+
         serializer = ConversationSerializer(queryset, many=True)
         return Response(serializer.data)
-    
-    def retrieve(self, request, pk=None):
-        conversation = get_object_or_404(Conversation, pk=pk)
-        serializer = ConversationSerializer(conversation)
-        return Response(serializer.data)
-    
+
     def create(self, request):
         serializer = ConversationSerializer(data=request.data)
         if serializer.is_valid():
@@ -28,13 +28,13 @@ class ConversationViewSet(viewsets.ViewSet):
 class MessageViewSet(viewsets.ViewSet):
 
     def list(self, request):
+        conversation_id = request.query_params.get('conversation_id')
         queryset = Message.objects.all()
-        serializer = MessageSerializer(queryset, many=True)
-        return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
-        message = get_object_or_404(Message, pk=pk)
-        serializer = MessageSerializer(message)
+        if conversation_id:
+            queryset = queryset.filter(conversation__conversation_id=conversation_id)
+
+        serializer = MessageSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):
