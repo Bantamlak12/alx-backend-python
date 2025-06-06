@@ -1,44 +1,38 @@
-from rest_framework import viewsets, status
-from rest_framework.request import Request
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
-from rest_framework import filters
+from rest_framework.permissions import IsAuthenticated
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsParticipantOfConversation
 
 
-class ConversationViewSet(viewsets.ViewSet):
-    search_filter =filters.SearchFilter()
+class ConversationViewSet(viewsets.ModelViewSet):
+    """Only authenticated users and participants can access conversation"""
+    queryset = Conversation.objects.all()
+    serializer_class = ConversationSerializer
+    permission_classes  = [IsAuthenticated, IsParticipantOfConversation]
 
-    def list(self, request: Request):
-        queryset = Conversation.objects.all()
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['participants__email']
 
-        queryset = self.search_filter.filter_queryset(request, queryset, self)
-
-        serializer = ConversationSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def create(self, request):
-        serializer = ConversationSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class MessageViewSet(viewsets.ViewSet):
-    ordering_filter = filters.OrderingFilter()
+class MessageViewSet(viewsets.ModelViewSet):
+    """Only participants of a conversation can send, view, update, and delete a message"""
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
 
-    def list(self, request):
-        queryset = Message.objects.all()
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['sent_at']
 
-        queryset = self.ordering_filter.filter_queryset(request, queryset, self)
-
-        serializer = MessageSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def create(self, request):
-        serializer = MessageSerializer(data=request.data)
-        if serializer.is_valid():
-            message = serializer.save()
-            return Response(MessageSerializer(message), status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        message = serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
