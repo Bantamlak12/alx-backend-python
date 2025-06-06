@@ -12,6 +12,10 @@ class IsParticipantOrReadOnly(permissions.BasePermission):
 class IsParticipantOfConversation(permissions.BasePermission):
     """Allow only participants in a conversation to access messages"""
     def has_object_permission(self, request, view, obj):        
+        # Check if user is authenticated
+        if request.user.is_authenticated:
+            return True
+
         # Check if the user is participant of the conversation
         if hasattr(obj, 'conversation') and request.user in obj.conversation.participants.all():
             return True
